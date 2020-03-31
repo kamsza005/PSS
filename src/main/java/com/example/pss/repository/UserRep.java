@@ -1,13 +1,15 @@
 package com.example.pss.repository;
 
-import com.example.pss.model.Role;
-import com.example.pss.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import com.example.pss.model.User;
+
 import java.util.Optional;
 
+@Repository
 public interface UserRep extends JpaRepository<User, Long> {
-    List<User> findAllByRole(Role role);
 
+   Optional<User> findById(long id);
+   Optional<User> findByName(String name);
 }

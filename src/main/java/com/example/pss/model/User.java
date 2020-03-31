@@ -1,60 +1,71 @@
 package com.example.pss.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.List;
+
+import java.util.HashSet;
 import java.util.Set;
 
+@Data
+@EqualsAndHashCode(exclude = {"roles", "delegations"})
+@ToString(exclude = {"roles", "delegations"})
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "User")
-@Getter
-@Setter
-
-
 public class User {
 
     @Id
-    @GeneratedValue
-    @Column(name="iduser") //obowiazkowe
-    private Integer iduser;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name="companyName",nullable=false) //obowiazkowe
+    @NotNull
     private String companyName;
 
-    @Column(name="companyAddress",nullable=false) //obowiazkowe
+    @NotNull
     private String companyAddress;
 
-    @Column(name="comapnyNip",nullable=false) //obowiazkowe
+    @NotNull
     private String companyNip;
 
-    @Column(name="name",nullable=false) //obowiazkowe
+    @NotNull
     private String name;
 
-    @Column(name="lastName",nullable=false) //obowiazkowe
+    @NotNull
     private String lastName;
 
-    @Column(name="email",nullable=false) //obowiazkowe
+    @NotNull
     private String email;
 
-    @Column(name="password",nullable=false) //obowiazkowe
+    @NotNull
     private String password;
 
-    @Column(name="status")
-    private Integer status = 1;
+    private boolean status;
 
-    @Column(name="registrationDate")
-    private LocalDate registrationDate = LocalDate.now();
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate registrationDate;
 
-    private Role role = Role.user;
+    @JsonIgnore
+    @ManyToMany(mappedBy = "users",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            fetch = FetchType.EAGER)
+    private Set<Role> roles = new HashSet<>();
 
-    @OneToMany
-    @JoinColumn(name="iddelegation") //relacja uzytkownika do delegacji
-    private List<Delegation> delegation;
 
-    public User(String companyName, String companyAddress, String companyNip,String name, String lastName, String email, String password) {
+    @JsonIgnore
+    @OneToMany(mappedBy="user",
+           cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER)
+    private Set<Delegation> delegations = new HashSet<>();
+
+
+    public User(@NotNull String companyName, @NotNull String companyAddress,
+                @NotNull String companyNip, @NotNull String name, @NotNull String lastName,
+                @NotNull String email, @NotNull String password) {
         this.companyName = companyName;
         this.companyAddress = companyAddress;
         this.companyNip = companyNip;
@@ -62,5 +73,9 @@ public class User {
         this.lastName = lastName;
         this.email = email;
         this.password = password;
+
+        this.status = true;
+        this.registrationDate = LocalDate.now();
     }
+
 }

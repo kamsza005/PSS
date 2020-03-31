@@ -1,53 +1,67 @@
 package com.example.pss.controller;
 
-import com.example.pss.model.Delegation;
-import com.example.pss.service.DelegationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.example.pss.model.Delegation;
+import com.example.pss.service.DelegationService;
+import com.example.pss.service.UserService;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/delegation")
 public class DelegationController {
 
-    @Autowired
     DelegationService delegationService;
+    UserService userService;
+
+    @Autowired
+    public DelegationController(DelegationService delegationService, UserService userService) {
+        this.delegationService = delegationService;
+        this.userService = userService;
+    }
 
     @PostMapping("/add")
-    public void add(@RequestParam("id") Long id,
-                    @RequestParam("delegation") Delegation delegation){
-        delegationService.addDelegation(id, delegation);
+    public void addDelegation(long userId, @RequestBody Delegation delegation) {
+        delegation.setUser(userService.getUser(userId));
+        delegationService.createDelegation(delegation);
     }
 
     @DeleteMapping("/delete")
-    @ResponseBody
-    public boolean remove(@RequestParam("userId") Long userId,
-                          @RequestParam("delegationId") Long delegationId){
-        return delegationService.removeDelegation(userId, delegationId);
+    public void removeDelegation(long userId, long delegationId) {
+        delegationService.deleteDelegation(userId, delegationId);
     }
 
     @PutMapping("/change")
-    public void change(@RequestParam("id") Long id,
-                                 @RequestParam("delegation") Delegation delegation){
-        delegationService.changeDelegation(id, delegation);
+    void changeDelegation(long delegationId, @RequestBody Delegation delegation) {
+        delegation.setId(delegationId);
+        delegation.setUser(delegationService.getDelegation(delegationId).getUser());
+        delegationService.updateDelegation(delegation);
     }
 
     @GetMapping("/all")
-    @ResponseBody
-    public List<Delegation> getAll(){
+    public List<Delegation> getAllDelegations() {
         return delegationService.getAllDelegations();
     }
 
-    @GetMapping("/allInOrder")
-    @ResponseBody
-    public List<Delegation> getAllInOrder(){
-        return delegationService.getAllDelegationsOrderByDateTimeStartDesc();
+    @GetMapping("/allOrder")
+    public List<Delegation> getAllDelegationsOrderByDateStartDesc() {
+        return delegationService.getAllDelegations()
+                .stream()
+                .sorted(Comparator.comparing(Delegation::getDateTimeStart,
+                        Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("allByUser")
-    @ResponseBody
-    public List<Delegation> getAllByUserInOrder(@RequestParam("id") Long id){
-        return delegationService.getAllDelByUserByDateTimeStartDesc(id);
+    @GetMapping("/allByUser")
+    public List<Delegation> getAllDelegationsByUserOrderByDateStartDesc(long id) {
+        return delegationService.getAllByUserId(id)
+                .stream()
+                .sorted(Comparator.comparing(Delegation::getDateTimeStart,
+                        Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
+
 }

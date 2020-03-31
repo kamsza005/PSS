@@ -1,5 +1,5 @@
 package com.example.pss.model;
 
 public enum AutoCapacityEnum {
-    wieksze, mniejsze
+    mniej_row_900,ponad_900,none;
 }

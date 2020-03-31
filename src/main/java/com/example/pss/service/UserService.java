@@ -1,51 +1,65 @@
 package com.example.pss.service;
 
-import com.example.pss.model.Delegation;
-import com.example.pss.model.User;
 import com.example.pss.repository.DelegationRep;
+import com.example.pss.repository.RoleRep;
 import com.example.pss.repository.UserRep;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.example.pss.model.User;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Transactional
 @Service
 public class UserService {
 
-    @Autowired
-    UserRep userRepository;
+    UserRep userRep;
+    RoleRep roleRep;
+    DelegationRep delegationRep;
 
     @Autowired
-    DelegationRep delegationRepository;
-
-    public void registerUser(User user){
-        userRepository.save(user);
+    public UserService(UserRep userRep, RoleRep roleRep, DelegationRep delegationRep) {
+        this.userRep = userRep;
+        this.roleRep = roleRep;
+        this.delegationRep = delegationRep;
     }
 
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
+    public List<User> getAllUsers() {
+        return userRep.findAll(Sort.by(Sort.Order.desc("id")));
     }
 
-    public void changePassword(Long userId, String newPassword){
-        Optional<User> user = userRepository.findById(userId);
-        user.get().setPassword(newPassword);
+    public User getUser(long id) {
+        return userRep.findById(id).get();
     }
 
-    public boolean deleteUserById(Long userId){
+    public User createUser(User user) {
+        return userRep.save(user);
+    }
+
+    public void updateUser(User user) {
+        userRep.save(user);
+    }
+
+    public void deleteUserById(long id) {
+        roleRep.deleteUserInRole(id);
+        delegationRep.deleteUserInDele(id);
+        userRep.deleteById(id);
+
+        /*
+
         List<Delegation> delegations = delegationRepository.findAllByUserId(userId);
         delegationRepository.deleteAll(delegations);
 
         userRepository.deleteById(userId);
+
+         */
     }
 
-    public List<User> getAllUsersByRoleName(String roleName){
-        return userRepository.findAll()
-                .stream()
-                    .filter(role -> role.getRoles()
-                            .stream()
-                            .anyMatch(name -> name.getRoleName().equals(roleName)))
-                .collect(Collectors.toList());
+    public void changePassword(long id, String password) {
+        User user = userRep.findById(id).get();
+        user.setPassword(password);
+        userRep.save(user);
     }
 }

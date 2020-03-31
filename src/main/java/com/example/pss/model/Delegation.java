@@ -1,90 +1,95 @@
 package com.example.pss.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.time.LocalDate;
 
+@Data
+@ToString(exclude = "user")
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "Delegation")
-@Getter
-@Setter
-
-
 public class Delegation {
 
     @Id
-    @GeneratedValue
-    @Column(name="iddelegation") //obowiazkowe
-    private Integer iddelegation;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name="description") //opcjonalne
     private String description;
 
-    @Column(name="dataTimeStart",nullable=false) //obowiazkowe
+    @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateTimeStart;
 
-    @Column(name="dataTimeStop",nullable=false) //obowiazkowe
+    @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateTimeStop;
 
-    @Column(name="travelDietAmount")
-    private Integer travelDietAmount=30;
+    private double travelDietAmount = 30;
 
-    @Column(name="breakfastNumber")
-    private Integer breakfastNumber=0;
+    private int breakfastNumber = 0;
 
-    @Column(name="dinnerNumber")
-    private Integer dinnerNumber=0;
+    private int dinnerNumber = 0;
 
-    @Column(name="supperNumber")
-    private Integer supperNumber=0;
+    private int supperNumber = 0;
 
-    @Column(name="transportEnum") //opcjonalne z 3
-    @Enumerated(EnumType.STRING)
     private TransportEnum transportEnum;
 
-    @Column(name="ticketPrice")
-    private Float ticketPrice;
+    private double ticketPrice;
 
-    @Column(name="autoCapacityEnum")
-    @Enumerated(EnumType.STRING)
     private AutoCapacityEnum autoCapacityEnum;
 
-    @Column(name="km")
-    private Float km;
+    private double km;
 
-    @Column(name="accomodationPrice") //opcjonalne
-    private Float accomodationPrice;
+    private double accommodationPrice;
 
-    @Column(name="otherticketsPrice") //opcjonalne
-    private Float otherTicketsPrice;
+    private double otherOutlayDesc;
 
-    @Column(name="otherOutlayDesc") //opcjonalne
-    private String otherOutlayDesc;
+    private double otherOutlayPrice;
 
-    @Column(name="otherOutlayPrice") //opcjonalne
-    private Float otherOutlayPrice;
-
-    @ManyToOne //relacja delegacji do uzytkownika
+    @JsonIgnore
+    @ManyToOne
     private User user;
 
-    public Delegation(String description, User user, LocalDate dateTimeStart,
-                      LocalDate dateTimeStop, TransportEnum transportEnum, Float ticketPrice,
-                      AutoCapacityEnum autoCapacityEnum, Float km, Float accomodationPrice,
-                      Float otherTicketsPrice, String otherOutlayDesc, Float otherOutlayPrice) {
+    public Delegation(@Null String description, @NotNull LocalDate dateTimeStart, @NotNull LocalDate dateTimeStop,
+                      double travelDietAmount, int breakfastNumber, int dinnerNumber, int supperNumber,
+                      TransportEnum transportEnum, double ticketPrice, AutoCapacityEnum autoCapacityEnum, double km,
+                      double accommodationPrice, double otherOutlayDesc, double otherOutlayPrice) {
         this.description = description;
-        this.user = user;
         this.dateTimeStart = dateTimeStart;
         this.dateTimeStop = dateTimeStop;
+        this.travelDietAmount = travelDietAmount;
+        this.breakfastNumber = breakfastNumber;
+        this.dinnerNumber = dinnerNumber;
+        this.supperNumber = supperNumber;
         this.transportEnum = transportEnum;
         this.ticketPrice = ticketPrice;
         this.autoCapacityEnum = autoCapacityEnum;
-        this.km= km;
-        this.accomodationPrice = accomodationPrice;
-        this.otherTicketsPrice = otherTicketsPrice;
+        this.km = km;
+        this.accommodationPrice = accommodationPrice;
         this.otherOutlayDesc = otherOutlayDesc;
         this.otherOutlayPrice = otherOutlayPrice;
+
+        if (this.transportEnum.equals(TransportEnum.auto)) {
+            this.ticketPrice = 0.0;
+        } else {
+            this.autoCapacityEnum = AutoCapacityEnum.none;
+            this.km = 0.0;
+        }
     }
 
+    public void addUser(User user){
+        this.setUser(user);
+        user.getDelegations().add(this);
+    }
+
+    public void removeUser(User user){
+        this.setUser(null);
+        user.getDelegations().remove(this);
+    }
 }

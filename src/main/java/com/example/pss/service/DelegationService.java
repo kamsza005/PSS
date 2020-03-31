@@ -1,31 +1,59 @@
 package com.example.pss.service;
 
-import com.example.pss.model.Delegation;
-import com.example.pss.model.User;
 import com.example.pss.repository.DelegationRep;
 import com.example.pss.repository.UserRep;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import com.example.pss.model.Delegation;
+import com.example.pss.model.User;
+;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DelegationService {
 
-    @Autowired
-    UserRep userRepository;
+    DelegationRep delegationRep;
+    UserRep userRep;
 
     @Autowired
-    DelegationRep delegationRepository;
-
-    public void addDelegation(Long userId, Delegation delegation){
-        Optional<User> user = userRepository.findById(userId);
-        delegation.setUser(userId);
-        delegationRepository.save(delegation);
+    public DelegationService(DelegationRep delegationRep, UserRep userRep) {
+        this.delegationRep = delegationRep;
+        this.userRep = userRep;
     }
 
-    public boolean removeDelegation(Long userId, Long delegationId){
+    public List<Delegation> getAllDelegations() {
+        return delegationRep.findAll(Sort.by(Sort.Order.desc("id")));
+    }
+
+    public List<Delegation> getAllByUserId(long id) {
+        return delegationRep.findAllByUser(userRep.findById(id).get());
+    }
+
+    public Delegation getDelegation(long id) {
+        return delegationRep.findById(id).get();
+    }
+
+    public Delegation createDelegation(Delegation delegation) {
+        return delegationRep.save(delegation);
+    }
+
+    public void updateDelegation(Delegation delegation) {
+        delegationRep.save(delegation);
+    }
+
+    public void deleteDelegation(long userId, long delegationId) {
+        Delegation delegation = delegationRep.findById(delegationId).get();
+
+        User user = userRep.findById(userId).get();
+        user.getDelegations().remove(delegation);
+        userRep.save(user);
+
+        delegationRep.deleteById(delegationId);
+
+
+        /*
         Optional<Delegation> delegation = delegationRepository.findById(delegationId);
 
         if(delegation.isPresent()) {
@@ -37,24 +65,8 @@ public class DelegationService {
             }
         }
         return false;
+         */
     }
 
-    public void changeDelegation(Long delegationId, Delegation delegation){
-        Optional<Delegation> delegation2 = delegationRepository.findById(delegationId);
 
-        //...
-
-    }
-
-    public List<Delegation> getAllDelegations(){
-        return delegationRepository.findAll();
-    }
-
-    public List<Delegation> getAllDelegationsOrderByDateTimeStartDesc(){
-        return delegationRepository.findByOrderByDateTimeStartDesc();
-    }
-
-    public List<Delegation> getAllDelByUserByDateTimeStartDesc(Long userId){
-        return delegationRepository.findAllByUserIdOrderByDateTimeStartDesc(userId);
-    }
 }
