@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
+//@EqualsAndHashCode(exclude = "user")
 @ToString(exclude = "user")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,6 +20,8 @@ public class Delegation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Size(min = 5)
     private String description;
 
     @NotNull
@@ -32,10 +34,16 @@ public class Delegation {
 
     private double travelDietAmount = 30;
 
+    @Min(0)
+    @Max(3)
     private int breakfastNumber = 0;
 
+    @Min(0)
+    @Max(3)
     private int dinnerNumber = 0;
 
+    @Min(0)
+    @Max(3)
     private int supperNumber = 0;
 
     private TransportEnum transportEnum;
@@ -56,7 +64,7 @@ public class Delegation {
     @ManyToOne
     private User user;
 
-    public Delegation(@Null String description, @NotNull LocalDate dateTimeStart, @NotNull LocalDate dateTimeStop,
+    public Delegation(@NotNull String description, @NotNull LocalDate dateTimeStart, @NotNull LocalDate dateTimeStop,
                       double travelDietAmount, int breakfastNumber, int dinnerNumber, int supperNumber,
                       TransportEnum transportEnum, double ticketPrice, AutoCapacityEnum autoCapacityEnum, double km,
                       double accommodationPrice, double otherOutlayDesc, double otherOutlayPrice) {
@@ -78,17 +86,17 @@ public class Delegation {
         if (this.transportEnum.equals(TransportEnum.auto)) {
             this.ticketPrice = 0.0;
         } else {
-            this.autoCapacityEnum = AutoCapacityEnum.none;
+            this.autoCapacityEnum = AutoCapacityEnum.NONE;
             this.km = 0.0;
         }
     }
 
-    public void addUser(User user){
+    public void addUser(User user) {
         this.setUser(user);
         user.getDelegations().add(this);
     }
 
-    public void removeUser(User user){
+    public void removeUser(User user) {
         this.setUser(null);
         user.getDelegations().remove(this);
     }

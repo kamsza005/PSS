@@ -16,7 +16,7 @@ public interface DelegationRep extends JpaRepository<Delegation, Long> {
     List<Delegation> findAllByUser(User user);
 
     @Modifying
-    @Query(value = "DELETE FROM DELEGATION WHERE USER_ID = ?1", nativeQuery = true)
-    void deleteUserInDele(long id);
+    @Query(value = "DELETE FROM DELEGATION  WHERE USER_ID = ?1", nativeQuery = true)
+    void deleteFrom_DELEGATION_ByUserId(long id);
 
 }

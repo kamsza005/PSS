@@ -36,6 +36,10 @@ public class RoleService {
         roleRep.save(role);
     }
 
+    public List<Role> findAllByRoleName(String name) {
+        return roleRep.findAllByRoleName(name);
+    }
+
     public List<User> getAllUsersByRoleName(String roleName) {
         return roleRep.findAllByRoleName(roleName)
                 .stream()

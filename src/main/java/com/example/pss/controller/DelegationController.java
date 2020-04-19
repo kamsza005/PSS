@@ -23,18 +23,18 @@ public class DelegationController {
         this.userService = userService;
     }
 
-    @PostMapping("/add")
+    @PostMapping("/addDelegation")
     public void addDelegation(long userId, @RequestBody Delegation delegation) {
         delegation.setUser(userService.getUser(userId));
         delegationService.createDelegation(delegation);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/removeDelegation")
     public void removeDelegation(long userId, long delegationId) {
         delegationService.deleteDelegation(userId, delegationId);
     }
 
-    @PutMapping("/change")
+    @PutMapping("/changeDelegation")
     void changeDelegation(long delegationId, @RequestBody Delegation delegation) {
         delegation.setId(delegationId);
         delegation.setUser(delegationService.getDelegation(delegationId).getUser());
@@ -46,7 +46,7 @@ public class DelegationController {
         return delegationService.getAllDelegations();
     }
 
-    @GetMapping("/allOrder")
+    @GetMapping("/allOrderByDateStartDesc")
     public List<Delegation> getAllDelegationsOrderByDateStartDesc() {
         return delegationService.getAllDelegations()
                 .stream()
@@ -55,7 +55,7 @@ public class DelegationController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/allByUser")
+    @GetMapping("/allByUserIdOrderOrderByDateStartDesc")
     public List<Delegation> getAllDelegationsByUserOrderByDateStartDesc(long id) {
         return delegationService.getAllByUserId(id)
                 .stream()

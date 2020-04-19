@@ -1,13 +1,12 @@
 package com.example.pss.service;
 
+import com.example.pss.model.Delegation;
+import com.example.pss.model.User;
 import com.example.pss.repository.DelegationRep;
 import com.example.pss.repository.UserRep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import com.example.pss.model.Delegation;
-import com.example.pss.model.User;
-;
 
 import java.util.List;
 
@@ -39,8 +38,8 @@ public class DelegationService {
         return delegationRep.save(delegation);
     }
 
-    public void updateDelegation(Delegation delegation) {
-        delegationRep.save(delegation);
+    public Delegation updateDelegation(Delegation delegation) {
+        return delegationRep.save(delegation);
     }
 
     public void deleteDelegation(long userId, long delegationId) {
@@ -51,22 +50,9 @@ public class DelegationService {
         userRep.save(user);
 
         delegationRep.deleteById(delegationId);
-
-
-        /*
-        Optional<Delegation> delegation = delegationRepository.findById(delegationId);
-
-        if(delegation.isPresent()) {
-            Delegation thisDelegation = delegation.get();
-
-            if (thisDelegation.getUser().getId().equals(userId)) {
-                delegationRepository.delete(thisDelegation);
-                return true;
-            }
-        }
-        return false;
-         */
     }
 
-
+    public void deleteEmptyDelegation(Delegation delegation) {
+        delegationRep.delete(delegation);
+    }
 }

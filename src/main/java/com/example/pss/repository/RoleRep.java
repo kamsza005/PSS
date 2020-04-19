@@ -15,7 +15,7 @@ public interface RoleRep extends JpaRepository<Role, Long> {
 
     @Modifying
     @Query(value = "DELETE FROM ROLE_USER  WHERE USER_ID = ?1", nativeQuery = true)
-    void deleteUserInRole(long id);
+    void deleteFrom_ROLE_USER_ByUserId(long id);
 
     List<Role> findAllByRoleName(String name);
 }

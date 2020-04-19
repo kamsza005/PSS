@@ -5,7 +5,9 @@ import com.example.pss.repository.DelegationRep;
 import com.example.pss.repository.RoleRep;
 import com.example.pss.repository.UserRep;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
@@ -14,24 +16,25 @@ import java.util.Arrays;
 @Service
 public class InitService {
 
-    UserRep userRepository;
-    RoleRep roleRepository;
-    DelegationRep delegationRepository;
+    private UserRep userRep;
+    private RoleRep roleRep;
+    private DelegationRep delegationRep;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public InitService(UserRep userRepository, RoleRep roleRepository,
-                       DelegationRep delegationRepository) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.delegationRepository = delegationRepository;
-
+    public InitService(UserRep userRep, RoleRep roleRep,
+                       DelegationRep delegationRep, PasswordEncoder passwordEncoder) {
+        this.userRep = userRep;
+        this.roleRep = roleRep;
+        this.delegationRep = delegationRep;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
     public void init() {
-        roleRepository.deleteAllInBatch();
-        delegationRepository.deleteAllInBatch();
-        userRepository.deleteAllInBatch();
+        roleRep.deleteAllInBatch();
+        delegationRep.deleteAllInBatch();
+        userRep.deleteAllInBatch();
 
         Role r1 = new Role("Role1");
         Role r2 = new Role("Role2");
@@ -45,12 +48,12 @@ public class InitService {
                 AutoCapacityEnum.mniej_row_900, 200.00, 100, 50, 50);
         Delegation d3 = new Delegation("Delegacja nr 3", LocalDate.now(), LocalDate.now().plusDays(15),
                 50, 1, 1, 1, TransportEnum.pociag, 34.50,
-                AutoCapacityEnum.none, 0.0, 100, 50, 50);
+                AutoCapacityEnum.NONE, 0.0, 100, 50, 50);
 
         User u1 = new User("abc", "Bydgoszcz", "nip1",
-                "Jan", "Kowalski", "kowalski@gmail.com", "abc123");
+                "Jan", "Kowalski", "kowalski@gmail.com", passwordEncoder.encode("abc123"));
         User u2 = new User("def", "Warszawa", "nip2",
-                "Jerzy", "Nowak", "nowak@wp.pl", "def456");
+                "Jerzy", "Nowak", "nowak@wp.pl", passwordEncoder.encode("nowak123"));
 
 
         r1.addUser(u1);
@@ -62,15 +65,16 @@ public class InitService {
         d2.addUser(u1);
         d3.addUser(u2);
 
-        userRepository.saveAll(Arrays.asList(u1, u2));
-        roleRepository.saveAll(Arrays.asList(r1, r2, r3));
-        delegationRepository.saveAll(Arrays.asList(d1, d2));
+        userRep.saveAll(Arrays.asList(u1, u2));
+        roleRep.saveAll(Arrays.asList(r1, r2, r3));
+        delegationRep.saveAll(Arrays.asList(d1, d2));
 
-        userRepository.findAll().forEach(user -> {
+        userRep.findAll().forEach(user -> {
             System.out.println(user);
             System.out.println(user.getRoles());
             System.out.println(user.getDelegations());
         });
+
 
     }
 }

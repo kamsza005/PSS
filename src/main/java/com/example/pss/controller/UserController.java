@@ -31,7 +31,7 @@ public class UserController {
         userService.createUser(user);
     }
 
-    @PutMapping("/change")
+    @PutMapping("/changePassword")
     public void changePassword(long userId, String newPassword){
         userService.changePassword(userId, newPassword);
     }
@@ -41,7 +41,7 @@ public class UserController {
          userService.deleteUserById(userId);
     }
 
-    @GetMapping("/allByRole")
+    @GetMapping("/allUsersByRoleName")
     public List<User> getAllUsersByRoleName(String roleName){
         return roleService.getAllUsersByRoleName(roleName);
     }

@@ -1,13 +1,5 @@
 package com.example.pss.controller;
 
-import com.example.pss.Main;
-import com.example.pss.model.AutoCapacityEnum;
-import com.example.pss.model.Delegation;
-import com.example.pss.model.TransportEnum;
-import com.example.pss.model.User;
-import com.example.pss.repository.DelegationRep;
-import com.example.pss.repository.UserRep;
-import com.example.pss.service.DelegationService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -23,6 +15,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import com.example.pss.Main;
+import com.example.pss.model.AutoCapacityEnum;
+import com.example.pss.model.Delegation;
+import com.example.pss.model.TransportEnum;
+import com.example.pss.model.User;
+import com.example.pss.repository.DelegationRep;
+import com.example.pss.repository.UserRep;
+import com.example.pss.service.DelegationService;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -57,14 +57,14 @@ public class DelegationTest {
     @Test
     public void addDelegation() throws Exception {
         User user = userRep.findAll().get(0);
-        Delegation delegation = new Delegation("Delegacja", LocalDate.now(), LocalDate.now().plusDays(10),
-                100, 1, 1, 1, TransportEnum.auto, 0,
-                AutoCapacityEnum.ponad_900, 100.00, 100, 50, 50);
+        Delegation delegation = new Delegation("Delegation description", LocalDate.now(), LocalDate.now().plusDays(8),
+                100, 1, 1, 2, TransportEnum.auto, 0,
+                AutoCapacityEnum.ponad_900, 190.00, 150, 50, 40);
 
 
         List<Delegation> allByUserIdBefore = delegationService.getAllByUserId(user.getId());
 
-        mvc.perform(MockMvcRequestBuilders.post("/api/delegation/add?&userId=" + user.getId())
+        mvc.perform(MockMvcRequestBuilders.post("/api/delegation/addDelegation?&userId=" + user.getId())
                 .content(asJsonString(delegation))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -86,7 +86,7 @@ public class DelegationTest {
         List<Delegation> allByUserId = delegationService.getAllByUserId(user.getId());
         Delegation delegationToDelete = allByUserId.get(0);
 
-        mvc.perform(MockMvcRequestBuilders.delete("/api/delegation/delete?userId=" + user.getId()
+        mvc.perform(MockMvcRequestBuilders.delete("/api/delegation/removeDelegation?userId=" + user.getId()
                 + "&delegationId=" + delegationToDelete.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -102,11 +102,11 @@ public class DelegationTest {
     public void changeDelegation() throws Exception {
         Delegation oldDelegation = delegationRep.findAll().get(0);
 
-        Delegation newDelegation = new Delegation("Zmiana", LocalDate.now(), LocalDate.now().plusDays(18),
-                100, 1, 1, 1, TransportEnum.auto, 50,
-                AutoCapacityEnum.none, 100, 100, 50, 50);
+        Delegation newDelegation = new Delegation("Changed delegation", LocalDate.now().plusDays(9), LocalDate.now().plusDays(18),
+                120, 2, 1, 1, TransportEnum.bus, 18,
+                AutoCapacityEnum.NONE, 70, 180, 40, 50);
 
-        mvc.perform(MockMvcRequestBuilders.put("/api/delegation/change?delegationId=" + oldDelegation.getId())
+        mvc.perform(MockMvcRequestBuilders.put("/api/delegation/changeDelegation?delegationId=" + oldDelegation.getId())
                 .content(asJsonString(newDelegation))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -144,7 +144,7 @@ public class DelegationTest {
     public void getAllDelegationsOrderByDateStartDesc() throws Exception {
         List<Delegation> delegations = delegationRep.findAll();
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/delegation/allOrder"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/delegation/allOrderByDateStartDesc"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType("application/json;"))
                 .andExpect(jsonPath("$.*", hasSize(delegations.size())))
@@ -158,7 +158,9 @@ public class DelegationTest {
                     });
 
                     List<Delegation> sortedDelegations = delegationsFromJson.stream()
-                            .sorted(Comparator.comparing(Delegation::getDateTimeStart, Comparator.reverseOrder())).collect(Collectors.toList());
+                            .sorted(Comparator.comparing(Delegation::getDateTimeStart, Comparator.reverseOrder()))
+                            .collect(Collectors.toList());
+
                     assertEquals(delegationsFromJson, sortedDelegations);
                 })
                 .andDo(MockMvcResultHandlers.print());
@@ -170,7 +172,7 @@ public class DelegationTest {
 
         List<Delegation> delegations = delegationService.getAllByUserId(user.getId());
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/delegation/allByUser?id=" + user.getId()))
+        mvc.perform(MockMvcRequestBuilders.get("/api/delegation/allByUserIdOrderOrderByDateStartDesc?id=" + user.getId()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType("application/json;"))
                 .andExpect(jsonPath("$.*", hasSize(delegations.size())))
@@ -188,7 +190,9 @@ public class DelegationTest {
                             .collect(Collectors.toList());
 
                     List<User> users = delegations.stream()
-                            .map(Delegation::getUser).distinct().collect(Collectors.toList());
+                            .map(Delegation::getUser)
+                            .distinct()
+                            .collect(Collectors.toList());
 
                     assertEquals(delegationsFromJson, sortedDelegations);
                     assertEquals(users.size(), 1);

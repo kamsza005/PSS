@@ -5,6 +5,7 @@ import com.example.pss.repository.RoleRep;
 import com.example.pss.repository.UserRep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.pss.model.User;
@@ -15,15 +16,18 @@ import java.util.List;
 @Service
 public class UserService {
 
-    UserRep userRep;
-    RoleRep roleRep;
-    DelegationRep delegationRep;
+    private UserRep userRep;
+    private RoleRep roleRep;
+    private DelegationRep delegationRep;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRep userRep, RoleRep roleRep, DelegationRep delegationRep) {
+    public UserService(UserRep userRep, RoleRep roleRep,
+                       DelegationRep delegationRep, PasswordEncoder passwordEncoder) {
         this.userRep = userRep;
         this.roleRep = roleRep;
         this.delegationRep = delegationRep;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> getAllUsers() {
@@ -35,31 +39,27 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRep.save(user);
     }
 
-    public void updateUser(User user) {
-        userRep.save(user);
+    public User updateUser(User user) {
+        return userRep.save(user);
     }
 
     public void deleteUserById(long id) {
-        roleRep.deleteUserInRole(id);
-        delegationRep.deleteUserInDele(id);
+        roleRep.deleteFrom_ROLE_USER_ByUserId(id);
+        delegationRep.deleteFrom_DELEGATION_ByUserId(id);
         userRep.deleteById(id);
-
-        /*
-
-        List<Delegation> delegations = delegationRepository.findAllByUserId(userId);
-        delegationRepository.deleteAll(delegations);
-
-        userRepository.deleteById(userId);
-
-         */
     }
 
     public void changePassword(long id, String password) {
         User user = userRep.findById(id).get();
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         userRep.save(user);
+    }
+
+    public List<User> findAllByEmail(String email) {
+        return userRep.findAllByEmail(email);
     }
 }
