@@ -51,9 +51,7 @@ public class Panel extends UI {
         } else {
 
             OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-            System.out.println("Site: " + oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
-
-            //Logged by Google
+            
             if (oAuth2AuthenticationToken.getAuthorizedClientRegistrationId().equals("google")) {
                 Map<String, Object> claims = ((DefaultOidcUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaims();
                 String email = (String) claims.get("email");
@@ -65,10 +63,8 @@ public class Panel extends UI {
                     loggedUser = userList.get(0);
                 }
             }
-            //Logged by Facebook
             else if (oAuth2AuthenticationToken.getAuthorizedClientRegistrationId().equals("facebook")) {
-                DefaultOAuth2User defaultOAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+                DefaultOAuth2User defaultOAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();           
                 String email = (String) defaultOAuth2User.getAttributes().get("email");
 
                 List<User> userList = userService.findAllByEmail(email);
@@ -79,7 +75,6 @@ public class Panel extends UI {
                 }
             }
 
-            //logged by github
             else if (oAuth2AuthenticationToken.getAuthorizedClientRegistrationId().equals("github")) {
                 DefaultOAuth2User defaultOAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -93,10 +88,9 @@ public class Panel extends UI {
                 }
             }
 
-            //logged by twitter
+            //nie dziala
             else if (oAuth2AuthenticationToken.getAuthorizedClientRegistrationId().equals("twitter")) {
                 DefaultOAuth2User defaultOAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
                 String email = (String) defaultOAuth2User.getAttributes().get("email");
 
                 List<User> userList = userService.findAllByEmail(email);
