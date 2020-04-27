@@ -34,7 +34,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin().defaultSuccessUrl("/logged", true).permitAll()
                 .and()
-                .logout().permitAll();
+                .logout().permitAll().logoutSuccessUrl("/")
+                .and()
+                .oauth2Login().defaultSuccessUrl("/logged");
 
         http.csrf().disable();
         http.headers().frameOptions().disable();

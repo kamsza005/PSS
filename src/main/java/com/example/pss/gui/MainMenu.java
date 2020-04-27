@@ -35,6 +35,8 @@ public class MainMenu extends UI {
     @Override
     protected void init(VaadinRequest request) {
 
+
+
         layout = new VerticalLayout();
         layout.setWidthFull();
         dane=new HorizontalLayout();
